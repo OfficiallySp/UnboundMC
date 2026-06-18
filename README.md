@@ -45,8 +45,8 @@ Re-running is safe (idempotent), and `uninstall` reverts everything (profile + t
 |---|---|
 | Core engine + CLI + tests | ✅ done, verified end-to-end (online + offline) |
 | Avalonia GUI (the double-click experience) | ✅ done (`Unbound.App`), dark wizard |
-| Per-OS self-contained packaging | ⏳ next |
-| Code signing / notarization | ⏳ (see notes below) |
+| Per-OS self-contained packaging | ✅ scripts + verified (win-x64, linux-x64) |
+| Code signing / notarization | ⏳ next (see notes below) |
 
 ## Project layout
 
@@ -81,6 +81,20 @@ dotnet run --project src/Unbound.Cli -- uninstall
 
 # options: --path <.minecraft>   --offline (use bundled jars only)
 ```
+
+## Packaging
+
+Build self-contained, single-file installers (the user needs no .NET runtime and no Java):
+
+```bash
+pwsh build/publish.ps1            # all platforms -> artifacts/<rid>/Unbound(.exe)
+pwsh build/publish.ps1 win-x64    # just one platform
+build/publish.sh                  # macOS/Linux dev (same output)
+```
+
+Targets: `win-x64`, `osx-x64`, `osx-arm64`, `linux-x64`. Each build is ~50 MB (it bundles the
+.NET runtime and Avalonia's native libraries into one file). The output is **unsigned** — see
+Distribution & trust below.
 
 ## Distribution & trust (read before shipping binaries)
 
