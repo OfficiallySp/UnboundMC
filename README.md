@@ -123,4 +123,4 @@ currently covers the mods, while Fabric's libraries are still fetched from the n
 - **No Chat Restrictions** is by **Aizistral**, licensed **WTFPL** —
   <https://github.com/Aizistral-Studios/No-Chat-Restrictions>. Unbound ships/downloads the
   official builds and does not reuse the mod's name or icon as its own.
-- Unbound's own code: choose a license (MIT/Apache-2.0 suggested) before publishing.
+- Unbound's own installer code is licensed **MIT** — see [LICENSE](LICENSE).
