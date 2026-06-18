@@ -44,8 +44,8 @@ Re-running is safe (idempotent), and `uninstall` reverts everything (profile + t
 | Milestone | State |
 |---|---|
 | Core engine + CLI + tests | ✅ done, verified end-to-end (online + offline) |
-| Avalonia GUI (the double-click experience) | ⏳ next |
-| Per-OS self-contained packaging | ⏳ |
+| Avalonia GUI (the double-click experience) | ✅ done (`Unbound.App`), dark wizard |
+| Per-OS self-contained packaging | ⏳ next |
 | Code signing / notarization | ⏳ (see notes below) |
 
 ## Project layout
@@ -55,6 +55,7 @@ Unbound.slnx
 src/
   Unbound.Core/    all install logic (platform-agnostic, fully unit-tested)
   Unbound.Cli/     console front-end that drives Core (dev + power users)
+  Unbound.App/     Avalonia GUI wizard (the double-click installer)
 tests/
   Unbound.Core.Tests/   xunit
 ```
@@ -67,7 +68,10 @@ Requires the **.NET 10 SDK**.
 dotnet build Unbound.slnx
 dotnet test  Unbound.slnx
 
-# install for a specific version
+# launch the GUI wizard (the double-click app)
+dotnet run --project src/Unbound.App
+
+# or use the CLI — install for a specific version
 dotnet run --project src/Unbound.Cli -- --mc 1.21.1
 
 # auto-detect a version, list supported versions, or revert
