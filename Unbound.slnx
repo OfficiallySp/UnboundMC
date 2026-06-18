@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Unbound.App/Unbound.App.csproj" />
     <Project Path="src/Unbound.Cli/Unbound.Cli.csproj" />
     <Project Path="src/Unbound.Core/Unbound.Core.csproj" />
   </Folder>

@@ -1,0 +1,90 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Unbound.App.ViewModels"
+        xmlns:conv="using:Avalonia.Data.Converters"
+        x:Class="Unbound.App.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Unbound" Width="560" Height="640"
+        CanResize="False" WindowStartupLocation="CenterScreen">
+
+    <Border Padding="32">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                <GradientStop Color="#16161D" Offset="0"/>
+                <GradientStop Color="#0E0E12" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
+
+        <DockPanel LastChildFill="True">
+
+            <!-- Header -->
+            <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,26">
+                <TextBlock Classes="h1" Text="Unbound"/>
+                <TextBlock Classes="sub" Text="Restore chat for restricted Minecraft accounts"/>
+            </StackPanel>
+
+            <Grid>
+                <!-- ===== Setup ===== -->
+                <StackPanel IsVisible="{Binding IsSetup}" Spacing="20">
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="MINECRAFT FOLDER"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox Grid.Column="0" Text="{Binding MinecraftPath}" IsReadOnly="True"
+                                     VerticalContentAlignment="Center"/>
+                            <Button Grid.Column="1" Content="Browse…" Margin="8,0,0,0" Click="OnBrowse"/>
+                        </Grid>
+                        <TextBlock Classes="sub" Text="{Binding PathHint}"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock Classes="label" Text="MINECRAFT VERSION"/>
+                        <ComboBox ItemsSource="{Binding Versions}" SelectedItem="{Binding SelectedVersion}"
+                                  HorizontalAlignment="Stretch" MaxDropDownHeight="240"/>
+                        <TextBlock Classes="sub" Text="Loading versions…" IsVisible="{Binding LoadingVersions}"/>
+                        <TextBlock Classes="sub" Foreground="{StaticResource BadBrush}"
+                                   Text="Offline — showing versions Unbound can install without internet."
+                                   IsVisible="{Binding OfflineNote}"/>
+                    </StackPanel>
+
+                    <Button Classes="primary" Content="Install Unbound" Command="{Binding InstallCommand}"/>
+
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <TextBlock Classes="sub" Text="Already installed?" VerticalAlignment="Center"/>
+                        <Button Classes="link" Content="Remove it" Command="{Binding UninstallCommand}"/>
+                    </StackPanel>
+                    <TextBlock Classes="sub" HorizontalAlignment="Center" Text="{Binding UninstallStatus}"
+                               IsVisible="{Binding UninstallStatus, Converter={x:Static conv:StringConverters.IsNotNullOrEmpty}}"/>
+                </StackPanel>
+
+                <!-- ===== Installing ===== -->
+                <StackPanel IsVisible="{Binding IsInstalling}" VerticalAlignment="Center" Spacing="22">
+                    <TextBlock Text="Installing…" FontSize="20" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <ProgressBar IsIndeterminate="True"/>
+                    <TextBlock Classes="sub" Text="{Binding ProgressText}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                </StackPanel>
+
+                <!-- ===== Done ===== -->
+                <StackPanel IsVisible="{Binding IsDone}" VerticalAlignment="Center" Spacing="16">
+                    <Border Width="64" Height="64" CornerRadius="32" Background="{StaticResource OkBrush}"
+                            HorizontalAlignment="Center">
+                        <TextBlock Text="✓" FontSize="34" Foreground="White"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="Unbound is installed" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center"/>
+                    <TextBlock Classes="sub" Text="{Binding ResultBody}" TextAlignment="Center"/>
+                    <Button Classes="primary" Content="Done" Click="OnClose" Margin="0,8,0,0"/>
+                    <Button Classes="link" HorizontalAlignment="Center" Content="Install another version"
+                            Command="{Binding RestartCommand}"/>
+                </StackPanel>
+
+                <!-- ===== Error ===== -->
+                <StackPanel IsVisible="{Binding IsError}" VerticalAlignment="Center" Spacing="16">
+                    <TextBlock Text="Something went wrong" FontSize="20" FontWeight="Bold"
+                               Foreground="{StaticResource BadBrush}" HorizontalAlignment="Center"/>
+                    <TextBlock Classes="sub" Text="{Binding ErrorText}" TextAlignment="Center"/>
+                    <Button Classes="primary" Content="Try again" Command="{Binding BackToSetupCommand}"/>
+                </StackPanel>
+            </Grid>
+        </DockPanel>
+    </Border>
+</Window>

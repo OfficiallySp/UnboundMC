@@ -25,6 +25,13 @@ public static class BundledMods
         return JsonSerializer.Deserialize<List<BundledJar>>(stream, Json) ?? new List<BundledJar>();
     }
 
+    /// <summary>Minecraft versions we can install fully offline (newest first).</summary>
+    public static IReadOnlyList<string> AvailableVersions { get; } = Manifest
+        .Select(b => b.MinecraftVersion)
+        .Distinct()
+        .OrderByDescending(v => v, MinecraftVersionComparer.Instance)
+        .ToList();
+
     /// <summary>Exact-match bundled jar for a mod at a given Minecraft version, or null.</summary>
     public static BundledJar? Find(string modKey, string mcVersion)
         => Manifest.FirstOrDefault(b => b.ModKey == modKey && b.MinecraftVersion == mcVersion);
