@@ -35,7 +35,9 @@ jobs:
         include:
           - { rid: win-x64,   os: windows-latest }
           - { rid: linux-x64, os: ubuntu-latest }
-          - { rid: osx-x64,   os: macos-13 }
+          # Both macOS targets build on the Apple-Silicon runner; osx-x64 is a self-contained
+          # cross-publish (the Intel macos-13 runner is deprecated). Signing is arch-independent.
+          - { rid: osx-x64,   os: macos-latest }
           - { rid: osx-arm64, os: macos-latest }
     runs-on: ${{ matrix.os }}
     steps:
