@@ -1,0 +1,11 @@
+# Normalize text line endings in the repo; check out native on each OS.
+* text=auto
+
+*.cs     text
+*.csproj text
+*.slnx   text
+*.json   text
+*.md     text
+
+# Treat mod jars as binary (no line-ending conversion).
+*.jar binary

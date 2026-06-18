@@ -1,0 +1,18 @@
+# .NET build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+
+# Publish output
+publish/
+artifacts/
+
+# IDE
+.vs/
+.idea/
+*.suo
+
+# Scratch test installs
+.tmp-mc*/

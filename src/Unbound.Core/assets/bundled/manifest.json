@@ -1,0 +1,4 @@
+[
+  { "ModKey": "fabric-api",           "MinecraftVersion": "1.21.1", "FileName": "fabric-api-fabric-1.21.1.jar" },
+  { "ModKey": "no-chat-restrictions", "MinecraftVersion": "1.21.1", "FileName": "no-chat-restrictions-fabric-1.21.1.jar" }
+]

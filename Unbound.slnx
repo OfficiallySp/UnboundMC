@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Unbound.Cli/Unbound.Cli.csproj" />
+    <Project Path="src/Unbound.Core/Unbound.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Unbound.Core.Tests/Unbound.Core.Tests.csproj" />
+  </Folder>
+</Solution>

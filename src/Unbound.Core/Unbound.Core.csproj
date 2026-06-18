@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Unbound.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Offline fallback mod jars, embedded so the installer works without internet.
+         Logical resource names become Unbound.Core.assets.bundled.<file>. -->
+    <EmbeddedResource Include="assets/bundled/**/*" />
+  </ItemGroup>
+
+</Project>
