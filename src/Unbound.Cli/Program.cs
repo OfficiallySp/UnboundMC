@@ -1,7 +1,12 @@
+using System.Text.Json;
 using Unbound.Core;
 using Unbound.Core.Models;
 
 // Unbound CLI — drives the Core install engine headlessly (for development and power users).
+
+// Maintenance command: refresh the embedded offline fallback jars. Doesn't touch .minecraft.
+if (args.Length > 0 && args[0] == "bundle")
+    return await RunBundleAsync(args[1..]);
 
 string? path = null;
 string? mc = null;
@@ -93,6 +98,66 @@ static string ArgValue(string[] args, ref int i)
     return args[++i];
 }
 
+// Downloads No Chat Restrictions + Fabric API for the given Minecraft versions and rewrites the
+// embedded fallback set. A version is only kept if BOTH mods are available (offline needs both).
+static async Task<int> RunBundleAsync(string[] a)
+{
+    var versions = new List<string>();
+    var outDir = Path.Combine("src", "Unbound.Core", "assets", "bundled");
+    for (int i = 0; i < a.Length; i++)
+    {
+        if (a[i] == "--out") outDir = a[++i];
+        else versions.Add(a[i]);
+    }
+    if (versions.Count == 0)
+    {
+        Console.Error.WriteLine("Usage: unbound bundle <mcVersion>... [--out <dir>]");
+        return 2;
+    }
+
+    Directory.CreateDirectory(outDir);
+    foreach (var f in Directory.GetFiles(outDir, "*.jar")) File.Delete(f);
+
+    using var http = UnboundHttp.Create();
+    var modrinth = new ModrinthClient(http);
+    (string Key, string Id, string Name)[] mods =
+    [
+        ("fabric-api", ModrinthClient.FabricApiId, "Fabric API"),
+        ("no-chat-restrictions", ModrinthClient.NoChatRestrictionsId, "No Chat Restrictions"),
+    ];
+
+    var manifest = new List<object>();
+    int kept = 0;
+    foreach (var ver in versions)
+    {
+        Console.WriteLine($"== {ver} ==");
+        var staged = new List<(string FileName, byte[] Bytes, string Key)>();
+        bool complete = true;
+        foreach (var (key, id, name) in mods)
+        {
+            var v = await modrinth.GetBestVersionAsync(id, ver, "fabric");
+            if (v is null) { Console.Error.WriteLine($"   ! no {name} fabric build for {ver}"); complete = false; break; }
+            var file = ModrinthClient.PrimaryFile(v);
+            var bytes = await modrinth.DownloadAsync(file);
+            staged.Add(($"{key}-fabric-{ver}.jar", bytes, key));
+            Console.WriteLine($"   + {name}: {file.Filename} ({bytes.Length / 1024} KB)");
+        }
+        if (!complete) { Console.Error.WriteLine($"   skipped {ver} — not fully available"); continue; }
+
+        foreach (var (fileName, bytes, key) in staged)
+        {
+            await File.WriteAllBytesAsync(Path.Combine(outDir, fileName), bytes);
+            manifest.Add(new { ModKey = key, MinecraftVersion = ver, FileName = fileName });
+        }
+        kept++;
+    }
+
+    var json = JsonSerializer.Serialize(manifest, new JsonSerializerOptions { WriteIndented = true });
+    await File.WriteAllTextAsync(Path.Combine(outDir, "manifest.json"), json);
+    Console.WriteLine($"\nBundled {kept} version(s) into {outDir}");
+    return 0;
+}
+
 static void PrintHelp()
 {
     Console.WriteLine(
@@ -108,5 +173,9 @@ static void PrintHelp()
           --mc <version>   Minecraft version to install for (e.g. 1.21.1). Auto-picked if omitted.
           --path <dir>     path to .minecraft (default: auto-detect for this OS)
           --offline        skip downloads and install from bundled jars only
+
+        Maintenance:
+          unbound bundle <version>... [--out <dir>]
+                           refresh the embedded offline fallback jars for the given versions
         """);
 }

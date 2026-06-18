@@ -113,10 +113,17 @@ pulling from Modrinth, and clearly attributing the mod author.
 ## Offline fallback jars
 
 `src/Unbound.Core/assets/bundled/` holds the embedded fallback jars and a `manifest.json` mapping
-`(mod, Minecraft version) → file`. They are exact-version matches; a production build should
-refresh/expand this set across popular versions as part of release. Currently bundled: 1.21.1.
-(Note: full no-internet support also needs the Fabric loader libraries bundled — `--offline`
-currently covers the mods, while Fabric's libraries are still fetched from the network.)
+`(mod, Minecraft version) → file`. They are exact-version matches. Regenerate/expand the set with
+the CLI's maintenance command (it reuses the SHA-verified Modrinth engine):
+
+```bash
+dotnet run --project src/Unbound.Cli -- bundle 1.20.1 1.21.1 1.21.4 1.21.8
+```
+
+Currently bundled: **1.20.1, 1.21.1, 1.21.4, 1.21.8** (~8.6 MB; Fabric API is the bulk — No Chat
+Restrictions itself is ~9 KB and one jar spans the whole 1.21.x range). (Note: full no-internet
+support also needs the Fabric loader libraries bundled — `--offline` currently covers the mods,
+while Fabric's libraries are still fetched from the network.)
 
 ## License & attribution
 
