@@ -1,0 +1,116 @@
+name: release
+
+# Builds self-contained single-file installers for every platform.
+#  - workflow_dispatch / push to a branch -> build + upload as workflow artifacts (a dry run).
+#  - push a tag like v1.0.0           -> also publish a GitHub Release with the binaries.
+#
+# Signing is OPTIONAL and OFF until the relevant secrets exist (see SIGNING.md):
+#  - Windows: Azure Trusted Signing (AZURE_* / TRUSTED_SIGNING_* secrets)
+#  - macOS:   Developer ID + notarization (MACOS_* secrets)
+# Without them the artifacts build fine, just unsigned.
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet test tests/Unbound.Core.Tests/Unbound.Core.Tests.csproj -c Release --nologo
+
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { rid: win-x64,   os: windows-latest }
+          - { rid: linux-x64, os: ubuntu-latest }
+          - { rid: osx-x64,   os: macos-13 }
+          - { rid: osx-arm64, os: macos-latest }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Secrets aren't reliably usable in `if:` directly, so resolve presence to step outputs.
+      - name: Detect signing secrets
+        id: cfg
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.AZURE_CLIENT_ID }}" ]; then echo "win_sign=true" >> "$GITHUB_OUTPUT"; else echo "win_sign=false" >> "$GITHUB_OUTPUT"; fi
+          if [ -n "${{ secrets.MACOS_CERTIFICATE_P12 }}" ]; then echo "mac_sign=true" >> "$GITHUB_OUTPUT"; else echo "mac_sign=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Publish (self-contained single file)
+        run: dotnet publish src/Unbound.App/Unbound.App.csproj -c Release -r ${{ matrix.rid }} -o "artifacts/${{ matrix.rid }}"
+
+      - name: Strip debug symbols
+        shell: bash
+        run: rm -f "artifacts/${{ matrix.rid }}"/*.pdb
+
+      - name: Sign — Windows (Azure Trusted Signing)
+        if: matrix.rid == 'win-x64' && steps.cfg.outputs.win_sign == 'true'
+        uses: azure/trusted-signing-action@v0.5.1   # check for a newer version before enabling
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.TRUSTED_SIGNING_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.TRUSTED_SIGNING_ACCOUNT }}
+          certificate-profile-name: ${{ secrets.TRUSTED_SIGNING_PROFILE }}
+          files-folder: artifacts/win-x64
+          files-folder-filter: exe
+
+      - name: Sign & notarize — macOS
+        if: startsWith(matrix.rid, 'osx') && steps.cfg.outputs.mac_sign == 'true'
+        shell: bash
+        env:
+          MACOS_CERTIFICATE_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_SIGN_IDENTITY: ${{ secrets.MACOS_SIGN_IDENTITY }}
+          MACOS_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          MACOS_NOTARY_ISSUER: ${{ secrets.MACOS_NOTARY_ISSUER }}
+        run: bash build/sign-macos.sh "artifacts/${{ matrix.rid }}/Unbound"
+
+      - name: Package
+        shell: bash
+        run: |
+          cd "artifacts/${{ matrix.rid }}"
+          if [ "${{ matrix.rid }}" = "win-x64" ]; then
+            7z a "../../Unbound-${{ matrix.rid }}.zip" Unbound.exe
+          else
+            chmod +x Unbound
+            tar -czf "../../Unbound-${{ matrix.rid }}.tar.gz" Unbound
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Unbound-${{ matrix.rid }}
+          path: Unbound-${{ matrix.rid }}.*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/**
+          generate_release_notes: true

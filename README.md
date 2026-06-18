@@ -46,7 +46,8 @@ Re-running is safe (idempotent), and `uninstall` reverts everything (profile + t
 | Core engine + CLI + tests | ✅ done, verified end-to-end (online + offline) |
 | Avalonia GUI (the double-click experience) | ✅ done (`Unbound.App`), dark wizard |
 | Per-OS self-contained packaging | ✅ scripts + verified (win-x64, linux-x64) |
-| Code signing / notarization | ⏳ next (see notes below) |
+| Release CI (all platforms) | ✅ `.github/workflows/release.yml` |
+| Code signing / notarization | ⚙️ CI scaffolded, secret-gated — needs certs ([SIGNING.md](SIGNING.md)) |
 
 ## Project layout
 
@@ -109,6 +110,12 @@ A downloaded installer that modifies game files trips OS safety systems:
 
 Build trust by keeping this **open source**, verifying every downloaded jar (we do), only ever
 pulling from Modrinth, and clearly attributing the mod author.
+
+**Releases & signing setup:** the [release workflow](.github/workflows/release.yml) builds all four
+platforms on every run and publishes a GitHub Release when you push a `v*` tag. Signing turns on
+automatically once the certs are added as repo secrets — see **[SIGNING.md](SIGNING.md)** for the
+Windows (Azure Trusted Signing) and macOS (Developer ID + notarization) setup, plus the
+"Run anyway" / Gatekeeper instructions to give users while builds are unsigned.
 
 ## Offline fallback jars
 
