@@ -2,6 +2,8 @@
 
 **A one-click installer that sets up [No Chat Restrictions](https://modrinth.com/mod/no-chat-restrictions) on a stock Minecraft install.**
 
+> Note this is more intended for less tech savvy users. People who have modding knowledge and use custom launchers do not need this
+
 Since 1.16.4, Minecraft can **lock accounts out of chat and the multiplayer menu** based on
 Microsoft/Mojang account flags (the "Chat disabled by account settings" block — it hits flagged
 and child accounts). The community mod **No Chat Restrictions** (by Aizistral) reverts that
@@ -39,30 +41,8 @@ Re-running is safe (idempotent), and `uninstall` reverts everything (profile + t
   release of No Chat Restrictions (`z440MEwJ`) + Fabric API (`P7dR8mSH`) for your version and the
   Fabric loader, verified by SHA-512.
 
-## Status
-
-| Milestone | State |
-|---|---|
-| Core engine + CLI + tests | ✅ done, verified end-to-end (online + offline) |
-| Avalonia GUI (the double-click experience) | ✅ done (`Unbound.App`), dark wizard |
-| Per-OS self-contained packaging | ✅ scripts + verified (win-x64, linux-x64) |
-| Release CI (all platforms) | ✅ `.github/workflows/release.yml` |
-| Code signing / notarization | ⚙️ CI scaffolded, secret-gated — needs certs ([SIGNING.md](SIGNING.md)) |
-
-## Project layout
-
-```
-Unbound.slnx
-src/
-  Unbound.Core/    all install logic (platform-agnostic, fully unit-tested)
-  Unbound.Cli/     console front-end that drives Core (dev + power users)
-  Unbound.App/     Avalonia GUI wizard (the double-click installer)
-tests/
-  Unbound.Core.Tests/   xunit
-```
-
 ## Build & run (CLI)
-
+**This project can also be run on the command line, see below**
 Requires the **.NET 10 SDK**.
 
 ```bash
