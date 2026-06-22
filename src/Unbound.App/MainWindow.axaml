@@ -85,6 +85,13 @@
                     <Button Classes="primary" Content="Try again" Command="{Binding BackToSetupCommand}"/>
                 </StackPanel>
             </Grid>
+
+            <!-- Footer / Credits -->
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" Margin="0,12,0,0">
+                <TextBlock Classes="sub" Text="Made by OfficiallySp." VerticalAlignment="Center"/>
+                <Button Classes="link" Content="officiallysp.net" Click="OnOpenUrl" Tag="https://officiallysp.net"/>
+                <Button Classes="link" Content="YouTube" Click="OnOpenUrl" Tag="https://www.youtube.com/@OfficiallySp"/>
+            </StackPanel>
         </DockPanel>
     </Border>
 </Window>
