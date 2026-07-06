@@ -10,7 +10,7 @@ if (args.Length > 0 && args[0] == "bundle")
 
 string? path = null;
 string? mc = null;
-bool offline = false, uninstall = false, list = false;
+bool offline = false, uninstall = false, list = false, keepOtherMods = false;
 
 for (int i = 0; i < args.Length; i++)
 {
@@ -19,6 +19,7 @@ for (int i = 0; i < args.Length; i++)
         case "--path": path = ArgValue(args, ref i); break;
         case "--mc": mc = ArgValue(args, ref i); break;
         case "--offline": offline = true; break;
+        case "--keep-other-mods": keepOtherMods = true; break;
         case "uninstall": uninstall = true; break;
         case "list": list = true; break;
         case "-h" or "--help" or "help":
@@ -74,13 +75,29 @@ var progress = new Progress<InstallProgress>(p => Console.WriteLine($"  [{p.Stag
 try
 {
     var result = await orchestrator.InstallAsync(
-        new InstallOptions { MinecraftPath = path, MinecraftVersion = mc, ForceOffline = offline },
+        new InstallOptions
+        {
+            MinecraftPath = path,
+            MinecraftVersion = mc,
+            ForceOffline = offline,
+            KeepOtherMods = keepOtherMods,
+        },
         progress);
 
     Console.WriteLine();
     Console.WriteLine($"Installed Unbound for Minecraft {result.MinecraftVersion} (Fabric {result.LoaderVersion}).");
     foreach (var m in result.Mods)
         Console.WriteLine($"   - {m.Name}  [{m.Source}]  {m.FileName}");
+
+    if (result.SetAsideMods.Count > 0)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Moved {result.SetAsideMods.Count} other mod(s) into mods/{ModsFolderGuard.DisabledDirName} so the game starts cleanly:");
+        foreach (var f in result.SetAsideMods)
+            Console.WriteLine($"   - {f}");
+        Console.WriteLine("   (want them back? move them out of that folder. Or re-run with --keep-other-mods.)");
+    }
+
     Console.WriteLine();
     Console.WriteLine("Open the Minecraft launcher, pick the \"Unbound\" profile, and play.");
     return 0;
@@ -173,6 +190,8 @@ static void PrintHelp()
           --mc <version>   Minecraft version to install for (e.g. 1.21.1). Auto-picked if omitted.
           --path <dir>     path to .minecraft (default: auto-detect for this OS)
           --offline        skip downloads and install from bundled jars only
+          --keep-other-mods  don't move other jars in mods/ aside (advanced; may cause
+                             "Incompatible mod found" if a leftover mod is incompatible)
 
         Maintenance:
           unbound bundle <version>... [--out <dir>]

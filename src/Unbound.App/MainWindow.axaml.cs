@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -28,4 +29,11 @@ public partial class MainWindow : Window
     }
 
     private void OnClose(object? sender, RoutedEventArgs e) => Close();
+
+    // Footer credit links — open the button's Tag URL in the user's default browser.
+    private async void OnOpenUrl(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string url } && Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            await Launcher.LaunchUriAsync(uri);
+    }
 }

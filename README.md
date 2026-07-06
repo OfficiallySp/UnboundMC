@@ -1,16 +1,14 @@
-# Unbound
+# Unbound: one-click Minecraft chat fix (No Chat Restrictions installer)
 
-**A one-click installer that sets up [No Chat Restrictions](https://modrinth.com/mod/no-chat-restrictions) on a stock Minecraft install.**
+**Unbound is a free, open-source, one-click installer that restores Minecraft chat and multiplayer by setting up [No Chat Restrictions](https://modrinth.com/mod/no-chat-restrictions) on a stock (vanilla) Minecraft install. No modding knowledge, no command line, and no Java required.**
 
-> Note this is more intended for less tech savvy users. People who have modding knowledge and use custom launchers do not need this
+If Minecraft shows **"Chat disabled by account settings"** or **"Multiplayer is disabled. Please check your Microsoft account settings,"** Unbound gets your chat and multiplayer access back in a few clicks. Double-click, pick your Minecraft version, done.
 
-Since 1.16.4, Minecraft can **lock accounts out of chat and the multiplayer menu** based on
-Microsoft/Mojang account flags (the "Chat disabled by account settings" block it hits flagged
-and child accounts). The community mod **No Chat Restrictions** (by Aizistral) reverts that
-behaviour client-side, restoring chat and multiplayer access the way it worked before 1.16.4.
-Unbound makes it trivial for non-technical players to get: double-click, pick your Minecraft
-version, done no command line, no Java knowledge, works with the **official launcher and
-vanilla client**.
+> Note: this is mainly for less tech-savvy users. People who already know modding and use custom launchers do not need this.
+
+## What "Chat disabled by account settings" is, and how Unbound fixes it
+
+Since 1.16.4, Minecraft can **lock accounts out of chat and the multiplayer menu** based on Microsoft/Mojang account flags. That is the **"Chat disabled by account settings"** block that flagged and child accounts hit. The community mod **No Chat Restrictions** (by Aizistral) reverts that behaviour client-side, restoring chat and multiplayer access the way it worked before 1.16.4. Unbound makes it trivial for non-technical players: double-click, pick your Minecraft version, done. No command line, no Java knowledge, and it works with the **official launcher and vanilla client**.
 
 > Unbound is an *installer*. It is not the mod and is **not affiliated** with Aizistral. It
 > installs the official No Chat Restrictions + Fabric API builds. All credit for the mod goes to
@@ -30,6 +28,26 @@ vanilla client**.
 
 No Chat Restrictions is **client-side only**, so nothing needs to change on the servers you join.
 Re-running is safe (idempotent), and `uninstall` reverts everything (profile + the mods it added).
+
+## Frequently asked questions
+
+### Does Unbound fix "Chat disabled by account settings"?
+Yes. That message appears when Minecraft locks a flagged or child account out of chat. Unbound installs No Chat Restrictions, which restores chat on the client side, so the message goes away and you can type in chat again.
+
+### Does it fix "Multiplayer is disabled. Please check your Microsoft account settings"?
+Yes, the same way. No Chat Restrictions restores access to the multiplayer menu and to servers on the client side.
+
+### Do I need Java or a custom launcher?
+No. Unbound writes the Fabric files directly, and the official Minecraft launcher runs the game with its own bundled Java. You never install Java yourself.
+
+### Which Minecraft versions are supported?
+Any version No Chat Restrictions publishes a Fabric build for. Run `unbound list` to see the current list. Recent versions such as 1.20.x and 1.21.x are supported, and 1.20.1, 1.21.1, 1.21.4, and 1.21.8 also work fully offline from bundled jars.
+
+### Is it safe? Is it a virus?
+Unbound is open source (read the code in this repo), only ever downloads official builds from Modrinth, and verifies every jar with a SHA-512 hash before installing. Because it is an unsigned installer that edits game files, Windows SmartScreen or macOS Gatekeeper may warn you the first time; see Distribution and trust below.
+
+### Will this unban me, or fix "Incompatible mod found"?
+See the Troubleshooting section below.
 
 ## How it works under the hood
 
@@ -111,6 +129,22 @@ Currently bundled: **1.20.1, 1.21.1, 1.21.4, 1.21.8** (~8.6 MB; Fabric API is th
 Restrictions itself is ~9 KB and one jar spans the whole 1.21.x range). (Note: full no-internet
 support also needs the Fabric loader libraries bundled `--offline` currently covers the mods,
 while Fabric's libraries are still fetched from the network.)
+
+## Troubleshooting
+
+**"Incompatible mod found" when Minecraft starts.**
+This is the Fabric loader refusing to boot because *another* mod in your `mods/` folder is
+incompatible with this Minecraft version, usually a leftover jar from an earlier manual attempt.
+It is **not** caused by the mods Unbound installs (those are matched to your version). As of v1.1,
+Unbound automatically moves any other jars in `mods/` into **`mods/.unbound-disabled/`** before
+installing, so this shouldn't happen. Just re-run Unbound. If you still hit it, open your `mods/`
+folder and move everything except the two jars Unbound added out of it. (Power users with a curated
+mod set can keep their mods in place with the CLI's `--keep-other-mods`.)
+
+**"I got chat-banned / muted on a server, will this fix it?"**
+No. Unbound reverts the **client-side account/version chat block** ("Chat disabled by account
+settings") that Minecraft applies to flagged accounts. It does **not** undo a **ban or mute issued
+by a server's moderators**. That lives on the server, and no client-side mod can change it.
 
 ## License & attribution
 

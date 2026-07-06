@@ -125,8 +125,12 @@ public partial class MainWindowViewModel : ObservableObject
                 progress));
 
             var mods = string.Join("\n", result.Mods.Select(m => $"   •  {m.Name}  ({m.Source})"));
+            var setAside = result.SetAsideMods.Count > 0
+                ? $"\n\nMoved {result.SetAsideMods.Count} other mod(s) aside (into mods/{ModsFolderGuard.DisabledDirName}) " +
+                  "so the game starts cleanly."
+                : "";
             ResultBody =
-                $"Minecraft {result.MinecraftVersion}  ·  Fabric {result.LoaderVersion}\n\n{mods}\n\n" +
+                $"Minecraft {result.MinecraftVersion}  ·  Fabric {result.LoaderVersion}\n\n{mods}{setAside}\n\n" +
                 "Open the Minecraft launcher, choose the “Unbound” profile, and play.";
             Step = WizardStep.Done;
         }

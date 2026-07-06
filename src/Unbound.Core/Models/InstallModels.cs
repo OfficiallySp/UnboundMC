@@ -22,6 +22,13 @@ public sealed class InstallOptions
     /// <summary>Skip all network access and install only from bundled fallback jars.</summary>
     public bool ForceOffline { get; init; }
 
+    /// <summary>
+    /// By default Unbound sweeps other jars out of <c>mods/</c> (into <c>mods/.unbound-disabled/</c>)
+    /// so leftover/incompatible mods can't trigger Fabric's "Incompatible mod found" crash.
+    /// Set true to leave them in place (for power users running a curated mod set).
+    /// </summary>
+    public bool KeepOtherMods { get; init; }
+
     /// <summary>Label shown for the profile in the official launcher.</summary>
     public string ProfileName { get; init; } = "Unbound";
 }
@@ -37,6 +44,9 @@ public sealed class InstallResult
     public required string ProfileKey { get; init; }  // key under launcher_profiles.json:profiles
     public required string MinecraftPath { get; init; }
     public List<InstalledMod> Mods { get; } = new();
+
+    /// <summary>File names of other mods moved into <c>mods/.unbound-disabled/</c> to avoid conflicts.</summary>
+    public List<string> SetAsideMods { get; } = new();
 }
 
 /// <summary>Persisted to <c>mods/.unbound-install.json</c> so re-installs are idempotent and uninstall is clean.</summary>

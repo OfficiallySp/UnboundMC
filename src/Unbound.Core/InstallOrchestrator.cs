@@ -50,6 +50,18 @@ public sealed class InstallOrchestrator
             MinecraftPath = opt.MinecraftPath,
         };
 
+        // Move any leftover/third-party jars aside so Fabric doesn't refuse to start with
+        // "Incompatible mod found". Runs after CleanPreviousInstall (so our old jars are already
+        // gone) and before we write the new set (so our own jars are never swept).
+        if (!opt.KeepOtherMods)
+        {
+            var setAside = ModsFolderGuard.SweepForeignJars(modsDir);
+            result.SetAsideMods.AddRange(setAside);
+            if (setAside.Count > 0)
+                progress?.Report(new(InstallStage.InstallingMods,
+                    $"Moved {setAside.Count} other mod(s) into mods/{ModsFolderGuard.DisabledDirName} to avoid conflicts"));
+        }
+
         await InstallModAsync(modsDir, "fabric-api", ModrinthClient.FabricApiId, "Fabric API", opt, result, progress, ct);
         await InstallModAsync(modsDir, "no-chat-restrictions", ModrinthClient.NoChatRestrictionsId, "No Chat Restrictions", opt, result, progress, ct);
 
