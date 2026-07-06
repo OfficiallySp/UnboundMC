@@ -1,6 +1,6 @@
 <Project>
   <!-- Shared version for all Unbound assemblies. Bump this, then tag v<Version> to release. -->
   <PropertyGroup>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
   </PropertyGroup>
 </Project>

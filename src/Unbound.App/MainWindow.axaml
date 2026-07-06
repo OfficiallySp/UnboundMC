@@ -23,6 +23,17 @@
                 <TextBlock Classes="sub" Text="Restore chat for restricted Minecraft accounts"/>
             </StackPanel>
 
+            <!-- Footer / Credits — declared before the fill area so the DockPanel actually docks it
+                 at the bottom (the last child fills, so the content Grid must come last). -->
+            <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="0,12,0,0">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8">
+                    <TextBlock Classes="sub" Text="Made by OfficiallySp" VerticalAlignment="Center"/>
+                    <Button Classes="link" Content="officiallysp.net" Click="OnOpenUrl" Tag="https://officiallysp.net"/>
+                    <Button Classes="link" Content="YouTube" Click="OnOpenUrl" Tag="https://www.youtube.com/@OfficiallySp"/>
+                </StackPanel>
+                <TextBlock Classes="sub" Text="{Binding AppVersion}" HorizontalAlignment="Center" Opacity="0.6"/>
+            </StackPanel>
+
             <Grid>
                 <!-- ===== Setup ===== -->
                 <StackPanel IsVisible="{Binding IsSetup}" Spacing="20">
@@ -86,12 +97,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Footer / Credits -->
-            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" Margin="0,12,0,0">
-                <TextBlock Classes="sub" Text="Made by OfficiallySp." VerticalAlignment="Center"/>
-                <Button Classes="link" Content="officiallysp.net" Click="OnOpenUrl" Tag="https://officiallysp.net"/>
-                <Button Classes="link" Content="YouTube" Click="OnOpenUrl" Tag="https://www.youtube.com/@OfficiallySp"/>
-            </StackPanel>
         </DockPanel>
     </Border>
 </Window>

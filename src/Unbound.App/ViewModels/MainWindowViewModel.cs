@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -40,6 +41,22 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _uninstallStatus = "";
 
     public ObservableCollection<string> Versions { get; } = new();
+
+    /// <summary>App version for the footer, e.g. "v1.1.0" (read from the assembly / Directory.Build.props).</summary>
+    public string AppVersion { get; } = ReadVersion();
+
+    private static string ReadVersion()
+    {
+        var asm = Assembly.GetExecutingAssembly();
+        var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        if (!string.IsNullOrWhiteSpace(info))
+        {
+            var plus = info.IndexOf('+'); // strip any "+<git-sha>" build metadata
+            return "v" + (plus >= 0 ? info[..plus] : info);
+        }
+        var v = asm.GetName().Version;
+        return v is null ? "" : $"v{v.Major}.{v.Minor}.{v.Build}";
+    }
 
     public bool IsSetup => Step == WizardStep.Setup;
     public bool IsInstalling => Step == WizardStep.Installing;
