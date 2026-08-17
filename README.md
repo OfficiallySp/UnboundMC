@@ -4,6 +4,8 @@
 
 If Minecraft shows **"Chat disabled by account settings"** or **"Multiplayer is disabled. Please check your Microsoft account settings,"** Unbound gets your chat and multiplayer access back in a few clicks. Double-click, pick your Minecraft version, done.
 
+This affects far more than flagged or child accounts. Players who rely on **accessibility tools and AAC devices** lose the chat their setups are built around, adult accounts get locked out until they verify their age with a photo ID or a face scan, and plenty of people are blocked with no explanation at all. Unbound restores chat for all of them.
+
 > Note: this is mainly for less tech-savvy users. People who already know modding and use custom launchers do not need this.
 
 ## What "Chat disabled by account settings" is, and how Unbound fixes it
@@ -27,7 +29,22 @@ Since 1.16.4, Minecraft can **lock accounts out of chat and the multiplayer menu
 4. Adds an **"Unbound"** profile to the official launcher. Open it, pick the profile, play.
 
 No Chat Restrictions is **client-side only**, so nothing needs to change on the servers you join.
-Re-running is safe (idempotent), and `uninstall` reverts everything (profile + the mods it added).
+Re-running is safe (idempotent), and `uninstall` reverts everything (profile, the mods it added, and
+any config it wrote).
+
+## Telemetry & profanity filter
+
+No Chat Restrictions turns off Mojang's chat telemetry and the chat profanity filter by default.
+Recent versions let you opt back into either through the mod's own config file
+(`config/NoChatRestrictions.json`). Unbound exposes both:
+
+- In the app, tick **Re-enable Mojang telemetry** or **Re-enable the chat profanity filter** before
+  installing.
+- On the CLI, pass `--allow-telemetry` and/or `--allow-profanity-filter`.
+
+Both are off by default, which keeps chat fully unrestricted. Unbound only writes
+`config/NoChatRestrictions.json` when you opt into one of them, backing up any existing config to
+`NoChatRestrictions.json.unbound-bak` first, and `uninstall` restores it.
 
 ## Frequently asked questions
 
@@ -36,6 +53,15 @@ Yes. That message appears when Minecraft locks a flagged or child account out of
 
 ### Does it fix "Multiplayer is disabled. Please check your Microsoft account settings"?
 Yes, the same way. No Chat Restrictions restores access to the multiplayer menu and to servers on the client side.
+
+### I got blocked after an update and I am not a child account. What happened?
+Minecraft has been rolling out **account age verification**. Accounts that have not verified lose chat, and on some versions the multiplayer menu as well, and the game shows the same "Chat disabled by account settings" message. Verifying means proving your age to a third-party verification provider, typically with a photo ID or a face scan. This is not limited to one country: players in the US and elsewhere report being blocked too, including long-standing adult accounts. Unbound restores chat on the client side, so you get your chat back without verifying and without handing your ID or biometric data to anyone.
+
+### I use an accessibility tool, screen reader, or AAC device and chat stopped working. Does this help?
+Yes. Assistive setups that read or send Minecraft chat, including AAC devices and custom accessibility interfaces, stop working when the account-level chat block kicks in, because the client itself refuses to send or show chat. No Chat Restrictions restores normal chat behaviour, which restores what those tools hook into. Unbound installs it with no modding, no Java, and no command line, which matters when the person doing the install cannot easily use a terminal.
+
+### Does this work with Lunar Client, CurseForge, Prism, or other custom launchers?
+Unbound targets the **official Minecraft launcher with a stock vanilla install**, which is what most affected players are running. If you already use Lunar, CurseForge, Prism, MultiMC, or the Modrinth App, you do not need Unbound: those launchers have their own mod support, so install [No Chat Restrictions](https://modrinth.com/mod/no-chat-restrictions) directly through them. Unbound is for people who have never installed a mod and do not want to start now.
 
 ### Do I need Java or a custom launcher?
 No. Unbound writes the Fabric files directly, and the official Minecraft launcher runs the game with its own bundled Java. You never install Java yourself.
@@ -79,6 +105,7 @@ dotnet run --project src/Unbound.Cli -- list
 dotnet run --project src/Unbound.Cli -- uninstall
 
 # options: --path <.minecraft>  --offline (use bundled jars only)
+#          --allow-telemetry  --allow-profanity-filter  (see Telemetry & profanity filter below)
 ```
 
 ## Packaging

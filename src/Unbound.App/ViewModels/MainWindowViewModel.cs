@@ -35,6 +35,9 @@ public partial class MainWindowViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(InstallCommand))]
     private string? _selectedVersion;
 
+    [ObservableProperty] private bool _allowTelemetry;
+    [ObservableProperty] private bool _allowProfanityFilter;
+
     [ObservableProperty] private string _progressText = "";
     [ObservableProperty] private string _resultBody = "";
     [ObservableProperty] private string _errorText = "";
@@ -138,7 +141,13 @@ public partial class MainWindowViewModel : ObservableObject
         {
             var orchestrator = new InstallOrchestrator();
             var result = await Task.Run(() => orchestrator.InstallAsync(
-                new InstallOptions { MinecraftPath = MinecraftPath, MinecraftVersion = SelectedVersion! },
+                new InstallOptions
+                {
+                    MinecraftPath = MinecraftPath,
+                    MinecraftVersion = SelectedVersion!,
+                    AllowTelemetry = AllowTelemetry,
+                    AllowProfanityFilter = AllowProfanityFilter,
+                },
                 progress));
 
             var mods = string.Join("\n", result.Mods.Select(m => $"   •  {m.Name}  ({m.Source})"));
@@ -146,8 +155,12 @@ public partial class MainWindowViewModel : ObservableObject
                 ? $"\n\nMoved {result.SetAsideMods.Count} other mod(s) aside (into mods/{ModsFolderGuard.DisabledDirName}) " +
                   "so the game starts cleanly."
                 : "";
+            var ncr = result.WroteNcrConfig
+                ? $"\n\nNo Chat Restrictions config: telemetry {(AllowTelemetry ? "on" : "off")}, " +
+                  $"profanity filter {(AllowProfanityFilter ? "on" : "off")}."
+                : "";
             ResultBody =
-                $"Minecraft {result.MinecraftVersion}  ·  Fabric {result.LoaderVersion}\n\n{mods}{setAside}\n\n" +
+                $"Minecraft {result.MinecraftVersion}  ·  Fabric {result.LoaderVersion}\n\n{mods}{setAside}{ncr}\n\n" +
                 "Open the Minecraft launcher, choose the “Unbound” profile, and play.";
             Step = WizardStep.Done;
         }

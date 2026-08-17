@@ -65,6 +65,17 @@ public sealed class InstallOrchestrator
         await InstallModAsync(modsDir, "fabric-api", ModrinthClient.FabricApiId, "Fabric API", opt, result, progress, ct);
         await InstallModAsync(modsDir, "no-chat-restrictions", ModrinthClient.NoChatRestrictionsId, "No Chat Restrictions", opt, result, progress, ct);
 
+        // No Chat Restrictions' own config (telemetry / profanity opt-in). Only written when the user
+        // asks for one of them; otherwise left untouched so the mod keeps its unrestricted defaults.
+        if (opt.AllowTelemetry || opt.AllowProfanityFilter)
+        {
+            progress?.Report(new(InstallStage.InstallingMods,
+                $"Writing {NoChatRestrictionsConfig.RelativePath} (telemetry {(opt.AllowTelemetry ? "on" : "off")}, " +
+                $"profanity filter {(opt.AllowProfanityFilter ? "on" : "off")})"));
+            NoChatRestrictionsConfig.Write(opt.MinecraftPath, opt.AllowTelemetry, opt.AllowProfanityFilter);
+            result.WroteNcrConfig = true;
+        }
+
         WriteInstallManifest(modsDir, result);
 
         // 3. Launcher profile.
@@ -153,6 +164,7 @@ public sealed class InstallOrchestrator
             ProfileId = result.ProfileId,
             ProfileKey = result.ProfileKey,
             Mods = result.Mods.ToList(),
+            WroteNcrConfig = result.WroteNcrConfig,
         };
         File.WriteAllText(Path.Combine(modsDir, ModsManifestFile), JsonSerializer.Serialize(manifest, Json));
     }

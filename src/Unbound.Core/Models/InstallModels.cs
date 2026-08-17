@@ -29,6 +29,15 @@ public sealed class InstallOptions
     /// </summary>
     public bool KeepOtherMods { get; init; }
 
+    /// <summary>
+    /// Opt back into Mojang telemetry (No Chat Restrictions disables it by default). When true (or
+    /// <see cref="AllowProfanityFilter"/> is), Unbound writes <c>config/NoChatRestrictions.json</c>.
+    /// </summary>
+    public bool AllowTelemetry { get; init; }
+
+    /// <summary>Opt back into the chat profanity filter (No Chat Restrictions disables it by default).</summary>
+    public bool AllowProfanityFilter { get; init; }
+
     /// <summary>Label shown for the profile in the official launcher.</summary>
     public string ProfileName { get; init; } = "Unbound";
 }
@@ -47,6 +56,9 @@ public sealed class InstallResult
 
     /// <summary>File names of other mods moved into <c>mods/.unbound-disabled/</c> to avoid conflicts.</summary>
     public List<string> SetAsideMods { get; } = new();
+
+    /// <summary>True if Unbound wrote <c>config/NoChatRestrictions.json</c> (telemetry/profanity opt-in).</summary>
+    public bool WroteNcrConfig { get; set; }
 }
 
 /// <summary>Persisted to <c>mods/.unbound-install.json</c> so re-installs are idempotent and uninstall is clean.</summary>
@@ -58,4 +70,7 @@ public sealed class InstallManifest
     public string ProfileId { get; set; } = "";
     public string ProfileKey { get; set; } = "";
     public List<InstalledMod> Mods { get; set; } = new();
+
+    /// <summary>True if Unbound wrote <c>config/NoChatRestrictions.json</c>, so uninstall can revert it.</summary>
+    public bool WroteNcrConfig { get; set; }
 }

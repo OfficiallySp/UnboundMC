@@ -4,7 +4,7 @@
         xmlns:conv="using:Avalonia.Data.Converters"
         x:Class="Unbound.App.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="Unbound" Width="560" Height="640"
+        Title="Unbound" Width="560" Height="710"
         CanResize="False" WindowStartupLocation="CenterScreen">
 
     <Border Padding="32">
@@ -55,6 +55,14 @@
                         <TextBlock Classes="sub" Foreground="{StaticResource BadBrush}"
                                    Text="Offline — showing versions Unbound can install without internet."
                                    IsVisible="{Binding OfflineNote}"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Classes="label" Text="OPTIONS"/>
+                        <CheckBox IsChecked="{Binding AllowTelemetry}" Content="Re-enable Mojang telemetry"/>
+                        <CheckBox IsChecked="{Binding AllowProfanityFilter}" Content="Re-enable the chat profanity filter"/>
+                        <TextBlock Classes="sub"
+                                   Text="Leave both off to keep chat fully unrestricted. Tick these only if you want telemetry or the profanity filter back."/>
                     </StackPanel>
 
                     <Button Classes="primary" Content="Install Unbound" Command="{Binding InstallCommand}"/>

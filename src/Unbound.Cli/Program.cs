@@ -11,6 +11,7 @@ if (args.Length > 0 && args[0] == "bundle")
 string? path = null;
 string? mc = null;
 bool offline = false, uninstall = false, list = false, keepOtherMods = false;
+bool allowTelemetry = false, allowProfanityFilter = false;
 
 for (int i = 0; i < args.Length; i++)
 {
@@ -20,6 +21,8 @@ for (int i = 0; i < args.Length; i++)
         case "--mc": mc = ArgValue(args, ref i); break;
         case "--offline": offline = true; break;
         case "--keep-other-mods": keepOtherMods = true; break;
+        case "--allow-telemetry": allowTelemetry = true; break;
+        case "--allow-profanity-filter": allowProfanityFilter = true; break;
         case "uninstall": uninstall = true; break;
         case "list": list = true; break;
         case "-h" or "--help" or "help":
@@ -81,6 +84,8 @@ try
             MinecraftVersion = mc,
             ForceOffline = offline,
             KeepOtherMods = keepOtherMods,
+            AllowTelemetry = allowTelemetry,
+            AllowProfanityFilter = allowProfanityFilter,
         },
         progress);
 
@@ -97,6 +102,11 @@ try
             Console.WriteLine($"   - {f}");
         Console.WriteLine("   (want them back? move them out of that folder. Or re-run with --keep-other-mods.)");
     }
+
+    if (result.WroteNcrConfig)
+        Console.WriteLine(
+            $"Wrote {NoChatRestrictionsConfig.RelativePath}: telemetry {(allowTelemetry ? "ON" : "off")}, " +
+            $"profanity filter {(allowProfanityFilter ? "ON" : "off")}.");
 
     Console.WriteLine();
     Console.WriteLine("Open the Minecraft launcher, pick the \"Unbound\" profile, and play.");
@@ -192,6 +202,8 @@ static void PrintHelp()
           --offline        skip downloads and install from bundled jars only
           --keep-other-mods  don't move other jars in mods/ aside (advanced; may cause
                              "Incompatible mod found" if a leftover mod is incompatible)
+          --allow-telemetry        re-enable Mojang telemetry (No Chat Restrictions turns it off)
+          --allow-profanity-filter re-enable the chat profanity filter (off by default)
 
         Maintenance:
           unbound bundle <version>... [--out <dir>]

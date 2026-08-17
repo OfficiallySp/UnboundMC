@@ -32,6 +32,11 @@ public static class UnboundUninstaller
                     LauncherProfiles.Remove(mcPath, manifest.ProfileKey);
                     removed = true;
                 }
+                if (manifest.WroteNcrConfig)
+                {
+                    NoChatRestrictionsConfig.Restore(mcPath);
+                    removed = true;
+                }
             }
         }
         catch { /* malformed manifest: still remove it below */ }
